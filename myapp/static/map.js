@@ -35,7 +35,7 @@ function initMap() {
   });
 
   document.getElementById('addStopButton').addEventListener('click', function() {
-    var stopInput = document.getElementById('stop');
+    var stopInput = document.getElementById('stop_input');
     var stopAddress = stopInput.value;
     getPlace(stopAddress, function(stopResults) {
       if (stopResults) {
@@ -161,9 +161,9 @@ function choosePlace(places, originalQuery, callback) {
     return;
   } else if (places.length === 1) {
     // If only one option matches, select it automatically
-    if (placesInRoute.includes(places[0].formatted_address)) {
+    if (stops.some(stop => stop.location === places[0].formatted_address)) {
       showToast('This point is already a part of your route!');
-      document.getElementById('stops').value = ''; // Clear the 'Stops' input
+      document.getElementById('stop_input').value = ''; // Clear the 'Stops' input
       $('#choosePlaceModal').modal('hide');
     } else {
       callback(places[0].formatted_address);
@@ -181,9 +181,9 @@ function choosePlace(places, originalQuery, callback) {
     button.innerText = (i + 1) + ". " + places[i].name + " - " + addressPart;
     button.onclick = (function(place) {
       return function() {
-        if (placesInRoute.includes(place.formatted_address)) {
+        if (stops.some(stop => stop.location === place.formatted_address)) {
           showToast('This point is already a part of your route!');
-          document.getElementById('stops').value = ''; // Clear the 'Stops' input
+          document.getElementById('stop_input').value = ''; // Clear the 'Stops' input
           $('#choosePlaceModal').modal('hide');
         } else {
           callback(place.formatted_address);
@@ -196,6 +196,7 @@ function choosePlace(places, originalQuery, callback) {
 
   $('#choosePlaceModal').modal('show');
 }
+
 
 
 
