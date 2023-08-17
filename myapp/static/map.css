@@ -1,0 +1,38 @@
+#map {
+    position: relative; /* Ensure proper positioning of child elements */
+}
+
+.blur-box {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.7); /* Semi-transparent white background */
+    filter: blur(10px); /* Apply blur */
+    z-index: 1000; /* Ensure they appear above the map */
+}
+
+#blur-top {
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 20px; /* Adjust based on your bounding box */
+}
+
+#blur-right {
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 20px; /* Adjust based on your bounding box */
+}
+
+#blur-bottom {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 20px; /* Adjust based on your bounding box */
+}
+
+#blur-left {
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 20px; /* Adjust based on your bounding box */
+}
