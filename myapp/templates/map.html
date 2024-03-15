@@ -26,7 +26,7 @@
         <input type="text" id="start" name="start">
         <label for="end">End:</label>
         <input type="text" id="end" name="end">
-        <button id="calculateRouteButton">Calculate Route</button>
+        <button id="calculateRouteButton" class="btn btn-outline-info btn-lg">Calculate Route</button>
     </div>
     <div class="modal" tabindex="-1" role="dialog" id="choosePlaceModal">
         <div class="modal-dialog" role="document">
@@ -46,15 +46,18 @@
           </div>
         </div>
       </div>
-      <button id="setStartButton">Set Start Point</button>
-      <button id="setEndButton">Set End Point</button>
-      <button id="resetButton">Reset</button>
-      <button id="addStopButton">Stops</button>
-      <div class="form-group">
-        <label for="stop_input">Stop:</label>
-        <input type="text" class="form-control" id="stop_input">
+      <div id="controls" class="p-4 rounded bg-light">
+        <button id="setStartButton" class="btn btn-warning mb-2">Set Start Point</button>
+        <button id="setEndButton" class="btn btn-info mb-2">Set End Point</button>
+        <button id="calculateRouteButton" class="btn btn-success mb-2">Calculate Route</button>
+        <div class="input-group mb-2">
+          <input type="text" id="stop_input" class="form-control" placeholder="Enter Stop">
+          <button id="addStopButton" class="btn btn-primary">Add Stop</button>
+        </div>
+        <button id="resetButton" class="btn btn-danger mb-2">Reset</button>
+        <div id="routeInfo"></div>
       </div>
-      <div id="routeInfo"></div>
+      
     <script src="{% static 'map.js' %}"></script>
 </body>
 </html>

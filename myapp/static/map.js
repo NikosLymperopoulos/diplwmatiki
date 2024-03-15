@@ -6,7 +6,7 @@ var settingStartPoint = false;
 var settingEndPoint = false;
 var stops = [];
 var placesInRoute = [];
-
+var roadSegments = [];
 function initMap() {
   directionsService = new google.maps.DirectionsService();
   directionsRenderer = new google.maps.DirectionsRenderer();
@@ -19,6 +19,38 @@ function initMap() {
   });
 
   directionsRenderer.setMap(map);
+
+  fetch('../static/GeoJson_data.geojson')
+    .then(response => response.json())
+    .then(data => {
+      // Iterate over each feature in the GeoJSON data
+      data.features.forEach(feature => {
+          // Extract line coordinates from GeoJSON data
+          const lineCoordinates = feature.geometry.coordinates;
+
+          // Create an array of LatLng objects for the Polyline
+          const path = lineCoordinates.map(coord => ({ lat: coord[1], lng: coord[0] }));
+
+          // Create a Polyline object for the road segment
+          const roadSegment = new google.maps.Polyline({
+            path: path,
+            strokeColor: '#D3D3D3', // Light grey color for road segments
+            strokeOpacity: 0.6,
+            strokeWeight: 4, // Triple the thickness
+            editable: false, // Set to true if you want to allow editing
+            draggable: false // Set to true if you want to allow dragging
+          });
+
+          // Set the Polyline on the map
+          roadSegment.setMap(map);
+
+          // Store reference to the Polyline object in the array
+          roadSegments.push(roadSegment);
+      });
+  })
+  .catch(error => {
+      console.error('Error fetching or processing GeoJSON data:', error);
+  });
 
   document.getElementById('calculateRouteButton').addEventListener('click', function() {
     calculateRoute();
@@ -197,71 +229,67 @@ function choosePlace(places, originalQuery, callback) {
   $('#choosePlaceModal').modal('show');
 }
 
-
-
-
 function formatQuery(query) {
-    query = query.charAt(0).toUpperCase() + query.slice(1).toLowerCase();
-    return toGreeklish(query);
-  }
-  
-function calculateRoute() {
-    var startAddress = document.getElementById('start').value;
-    var endAddress = document.getElementById('end').value;
-  
-    getPlace(startAddress, function(startResults) {
-      if (startResults) {
-        choosePlace(startResults, startAddress, function(startResult) {
-          getPlace(endAddress, function(endResults) {
-            if (endResults) {
-              choosePlace(endResults, endAddress, function(endResult) {
-                var request = {
-                  origin: startResult,
-                  destination: endResult,
-                  travelMode: 'WALKING',
-                  waypoints: stops,
-                  optimizeWaypoints: true
-                };
-  
-                directionsService.route(request, function(result, status) {
-                  if (status == 'OK') {
-                    directionsRenderer.setDirections(result);
-  
-                    // Calculate total distance
-                    var totalDistance = 0;
-                    var route = result.routes[0];
-  
-                    for (var i = 0; i < route.legs.length; i++) {
-                      totalDistance += route.legs[i].distance.value;
-                    }
-  
-                    totalDistance = (totalDistance / 1000).toFixed(2); // Convert to kilometers
-                    
-                    // Calculate total duration based on the total distance and an average walking speed of 5 km/h
-                    var totalDuration = (totalDistance / 5) * 60; // Convert to minutes
-                    var totalDurationHours = Math.floor(totalDuration / 60);
-                    var totalDurationMinutes = Math.round(totalDuration % 60);
-  
-                    // Display them in the 'routeInfo' div using Bootstrap classes
-                    document.getElementById('routeInfo').innerHTML =
-                      '<div class="alert alert-info">' +
-                      '<strong>Distance:</strong> ' + totalDistance + " km" +
-                      '<br><strong>Duration:</strong> ' + totalDurationHours + "h " + totalDurationMinutes + "m" +
-                      '</div>';
-                  } else {
-                    alert("Error finding route: " + status);
-                  }
-                });
-              });
-            }
-          });
-        });
-      }
-    });
+  query = query.charAt(0).toUpperCase() + query.slice(1).toLowerCase();
+  return toGreeklish(query);
 }
   
+function calculateRoute() {
+  var startAddress = document.getElementById('start').value;
+  var endAddress = document.getElementById('end').value;
 
-  
+  getPlace(startAddress, function(startResults) {
+    if (startResults) {
+      choosePlace(startResults, startAddress, function(startResult) {
+        getPlace(endAddress, function(endResults) {
+          if (endResults) {
+            choosePlace(endResults, endAddress, function(endResult) {
+
+              var request = {
+                origin: startResult,
+                destination: endResult,
+                travelMode: 'WALKING',
+                waypoints: stops,
+                provideRouteAlternatives: true
+              };
+
+              directionsService.route(request, function(result, status) {
+                if (status == 'OK') {
+                  var route = result.routes[0];
+                  directionsRenderer.setDirections(result);
+
+                  // Calculate the total distance
+                  var totalDistance = 0;
+                  for (var i = 0; i < route.legs.length; i++) {
+                    totalDistance += route.legs[i].distance.value;
+                  }
+
+                  totalDistance = (totalDistance / 1000).toFixed(2); // Convert to kilometers
+
+                  // Calculate total duration based on the total distance and an average walking speed of 5 km/h
+                  var totalDuration = (totalDistance / 5) * 60; // Convert to minutes
+                  var totalDurationHours = Math.floor(totalDuration / 60);
+                  var totalDurationMinutes = Math.round(totalDuration % 60);
+
+                  // Display them in the 'routeInfo' div using Bootstrap classes
+                  document.getElementById('routeInfo').innerHTML =
+                    '<div class="alert alert-info">' +
+                    '<strong>Distance:</strong> ' + totalDistance + " km" +
+                    '<br><strong>Duration:</strong> ' + totalDurationHours + "h " + totalDurationMinutes + "m" +
+                    '</div>';
+                } else {
+                  console.error('Directions request failed:', status);
+                }
+              });
+            });
+          }
+        });
+      });
+    }
+  });
+}
+
+
 
 document.getElementById('resetButton').addEventListener('click', function() {
   location.reload();

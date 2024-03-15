@@ -1,10 +1,16 @@
+html, body {
+    min-height: 100vh;
+    background-color: red;
+}
+
 #map {
     position: relative; /* Ensure proper positioning of child elements */
+    background-color: #008080; /* White for the map area */
 }
 
 .blur-box {
     position: absolute;
-    background-color: rgba(255, 255, 255, 0.7); /* Semi-transparent white background */
+    background-color: rgba(0, 128, 128, 0.7); /* Semi-transparent white background */
     filter: blur(10px); /* Apply blur */
     z-index: 1000; /* Ensure they appear above the map */
 }
